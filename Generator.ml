@@ -108,23 +108,30 @@ module Generator :
   struct
     (* TODO : Implémenter le type et tous les éléments de la signature *)
     
+    (* Le type générique 'a t représente un générateur qui prend un état aléatoire de type Random.State.t et renvoie une valeur de type 'a *)
     type 'a t = Random.State.t -> 'a
 
+    (* La fonction generate utilise un générateur et un état aléatoire pour générer une valeur. *)
     let generate (gen : 'a t) (state : Random.State.t) : 'a =
       gen state
 
+    (* Générateur pour le type bool *)
     let bool : bool t = fun state ->
       Random.State.bool state
 
+    (* Générateur pour le type int *)
     let int : int t = fun state ->
       Random.State.int state (1 lsl 30)
 
+    (* Générateur pour le type float *)
     let float : float t = fun state ->
       Random.State.float state 1.
 
+    (* Générateur pour le type char *)
     let char : char t = fun state ->
       Char.chr (Random.State.int state 256)
 
+    (* Générateur de chaînes de longueur len avec la fonction string *)
     let string (len : int) : string t = fun state ->
       let buffer = Bytes.create len in
       for i = 0 to len - 1 do
@@ -132,6 +139,7 @@ module Generator :
       done;
       Bytes.to_string buffer
 
+    (* La fonction list prend un générateur gen et une longueur len et renvoie un générateur de listes de longueur len *)
     let list (gen : 'a t) (len : int) : 'a list t =
       let rec loop acc remaining_length =
         if remaining_length <= 0 then acc
@@ -139,6 +147,8 @@ module Generator :
       in
       fun state -> loop [] len
 
+    (* Fonctions de transformation pour filtrer les valeurs générées (filter) et pour appliquer une fonction de transformation à chaque élément généré (map) *)
+    
     let filter (gen : 'a t) (predicate : 'a -> bool) : 'a t =
       let rec loop () =
         let x = gen state in
