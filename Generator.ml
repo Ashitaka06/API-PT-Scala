@@ -107,4 +107,46 @@ module Generator :
   end =
   struct
     (* TODO : Implémenter le type et tous les éléments de la signature *)
+    
+    type 'a t = Random.State.t -> 'a
+
+    let generate (gen : 'a t) (state : Random.State.t) : 'a =
+      gen state
+
+    let bool : bool t = fun state ->
+      Random.State.bool state
+
+    let int : int t = fun state ->
+      Random.State.int state (1 lsl 30)
+
+    let float : float t = fun state ->
+      Random.State.float state 1.
+
+    let char : char t = fun state ->
+      Char.chr (Random.State.int state 256)
+
+    let string (len : int) : string t = fun state ->
+      let buffer = Bytes.create len in
+      for i = 0 to len - 1 do
+        Bytes.set buffer i (char state)
+      done;
+      Bytes.to_string buffer
+
+    let list (gen : 'a t) (len : int) : 'a list t =
+      let rec loop acc remaining_length =
+        if remaining_length <= 0 then acc
+        else loop ((gen state) :: acc) (remaining_length - 1)
+      in
+      fun state -> loop [] len
+
+    let filter (gen : 'a t) (predicate : 'a -> bool) : 'a t =
+      let rec loop () =
+        let x = gen state in
+        if predicate x then x else loop ()
+      in
+      loop
+
+    let map (gen : 'a t) (f : 'a -> 'b) : 'b t =
+      fun state -> f (gen state)
+
   end ;;
