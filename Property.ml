@@ -11,6 +11,10 @@ module Property :
 
     (** Propriété jamais   vérifiée *)
     val always_false : 'a t
+    
+    (* Fonctionnalité supplémentaire *)
+    val combine : 'a t -> 'a t -> 'a t
+    
   end =
   struct
     type 'a t = 'a -> bool ;;
@@ -22,5 +26,8 @@ module Property :
     
     (* always_false renvoie toujours false quelle que soit l'entrée. *)
     let always_false : 'a t = fun _ -> false
+    
+    (* Fonction qui combine deux propriétés en une nouvelle propriété qui est vraie si les deux propriétés sont vraies. *)
+    let combine (p1 : 'a t) (p2 : 'a t) : 'a t = fun x -> p1 x && p2 x
    
-  end ;;
+  end;;
